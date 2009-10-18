@@ -113,7 +113,7 @@ class ScriptFuShell
         (cond
           ((eq? #f item) "#f")
           ((eq? #t item) "#t")
-          ((string? item) item)
+          ((string? item) (string-append "\\"" item "\\""))
           ((number? item) (number->string item))
           ((procedure? item) "<procedure>")
           ((vector? item) "<vector>")

@@ -22,8 +22,7 @@ class ScriptFuShellTest < Test::Unit::TestCase
     assert_equal( "(1 2 3)", @sh.send("(list 1 2 3)"))
     assert_equal( "(1 2 3)", @sh.send("'(1 2 3)"))
 
-    # unexpected behaviour!
-    # assert_equal( '"123"', @sh.send('"123"'))
+    assert_equal( '"123"', @sh.send('"123"'))
     
     assert_equal( "(1)", @sh.send("'(1)"))
     assert_equal( "()", @sh.send("'()"))

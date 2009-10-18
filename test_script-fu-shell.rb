@@ -1,4 +1,5 @@
 #!/usr/bin/ruby
+# -*- coding: utf-8 -*-
 
 require "script-fu-shell"
 require "test/unit"
@@ -23,10 +24,20 @@ class ScriptFuShellTest < Test::Unit::TestCase
     assert_equal( "(1 2 3)", @sh.send("'(1 2 3)"))
 
     assert_equal( '"123"', @sh.send('"123"'))
+
+    # escape char
+    assert_equal( '"a"b"', @sh.send('"a\"b"'))
+
+    # paren in string
+    assert_equal( '"a(b"', @sh.send('"a(b"'))
+    assert_equal( '"a)b"', @sh.send('"a)b"'))
     
     assert_equal( "(1)", @sh.send("'(1)"))
     assert_equal( "()", @sh.send("'()"))
     assert_equal( "()", @sh.send("()"))
+
+    assert_equal( "3", @sh.send("(+ 1 \n 2)"))
+    assert_equal( "3", @sh.send("(+ 1 \n ;; comment \n 2)"))
 
     @sh.send("()")
     assert_equal( 0, @sh.byte2i(@sh.error_code))

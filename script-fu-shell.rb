@@ -48,7 +48,7 @@ class ScriptFuShell
 
 
   def byte2i(x)
-    x.unpack("C").first
+    x.unpack("C").first.to_i
   end
 
   def send_raw(script)
@@ -69,7 +69,7 @@ class ScriptFuShell
 
     pp [magic, byte2i(@error_code), byte2i(high_byte), byte2i(low_byte)] if @debug
 
-    length = low_byte.unpack("C").first.to_i
+    length = byte2i(low_byte)
     
     @soc.read(length)
   end

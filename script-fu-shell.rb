@@ -42,7 +42,7 @@ class ScriptFuShell
     @prompt = @normal_prompt
     @sexp = ""
 
-    @debug = !true
+    @debug = $DEBUG
     @error_code = nil
   end
 
@@ -50,6 +50,7 @@ class ScriptFuShell
   def byte2i(x)
     x.unpack("C").first.to_i
   end
+
 
   def send_raw(script)
     header = ["G", script.length].pack("an")
@@ -76,8 +77,8 @@ class ScriptFuShell
   
 
   def send(script)
-    return "<no input>" if /^\s*$/m =~ script
-    puts script
+    return "<no input>" if /\A\s*\Z/m =~ script
+    puts script.strip if @debug
     send_raw %Q{(return-item-tostring #{script.strip})}
   end
 
@@ -147,8 +148,9 @@ class ScriptFuShell
         @sexp = ""
         @prompt = @normal_prompt
       else
-        @sexp += "\n " + line
+        @sexp += line + "\n"
         @prompt = @paren_depth.to_s + @continuous_prompt
+        puts "sexp: <<#{@sexp}>>" if @debug
       end
     end
   end

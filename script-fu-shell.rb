@@ -11,7 +11,6 @@ class ScriptFuShell
 
   def initialize
     @soc = TCPSocket.open("localhost", 10008)
-#    @soc = TCPSocket.open("192.168.1.115", 10008)
     @paren_depth = 0
     @out_of_string = true
     @normal_prompt = "> "
@@ -82,30 +81,6 @@ class ScriptFuShell
     return ((@paren_depth == 0) ? true : false) && @out_of_string
   end
 
-=begin
-          ((pair? item) (string-append 
-              "("
-              (unbreakupstr
-                (list
-                  (return-item-tostring (car item))
-                  (return-item-tostring (cdr item)))
-                " ")
-              ")"))
-
-
-      (define (return-item-tostring item)
-        (cond
-          ((pair? item) (string-append 
-              "("
-              (unbreakupstr
-                (map return-item-tostring item)
-                " ")
-              ")"
-              ))
-          (else item)))
-
-
-=end
 
   def script_fu_init
     send_raw(

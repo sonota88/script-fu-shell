@@ -44,4 +44,10 @@ class ScriptFuShellTest < Test::Unit::TestCase
     @sh.send("(1)")
     assert_not_equal( 0, @sh.byte2i(@sh.error_code))
   end
+
+
+  def test_high_byte
+    assert_equal('"' + "a"*1 + '"', @sh.send('(make-string 1 #\a)'))
+    assert_equal('"' + "a"*254 + '"', @sh.send('(make-string 254 #\a)'))
+  end
 end

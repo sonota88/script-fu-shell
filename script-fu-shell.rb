@@ -61,7 +61,7 @@ class ScriptFuShell
 
     pp [magic, byte2i(@error_code), byte2i(high_byte), byte2i(low_byte)] if @debug
 
-    length = byte2i(low_byte)
+    length = byte2i(high_byte) * 256 + byte2i(low_byte)
     
     @soc.read(length)
   end

@@ -101,16 +101,19 @@ class ScriptFuShell
     send_raw(
       <<EOB
 (define (item->string item)
-  (cond ((eq? #f item) "#f")
+  (cond ((null? item) "'()")
+        ((eq? #f item) "#f")
         ((eq? #t item) "#t")
+        ((char? item) (string-append "#\\\\" (string item)))
         ((string? item) (string-append "\\"" item "\\""))
         ((number? item) (number->string item))
-        ((procedure? item) "<procedure>")
-        ((vector? item) "<vector>")
-        ((null? item) "()")
         ((symbol? item) (string-append
-                         "<symbol> "
+                         "'"
                          (symbol->string item)))
+        ((vector? item) (string-append
+                         "#("
+                         (unbreakupstr (map item->string (vector->list item)) " ")
+                         ")"))
         ((list? item) (string-append
                        "("
                        (unbreakupstr (map item->string item) " ")
@@ -121,7 +124,9 @@ class ScriptFuShell
                        " . "
                        (item->string (cdr item))
                        ")"))
-        (else item)))
+        ((closure? item) "#<CLOSURE>")
+        ((procedure? item) "#<PROCEDURE>")
+        (else "<?>")))
 EOB
     )
   end

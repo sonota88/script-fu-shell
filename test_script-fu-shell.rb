@@ -13,8 +13,13 @@ class ScriptFuShellTest < Test::Unit::TestCase
   def test_send
     assert_equal( "<no input>", @sh.send(""))
 
+    assert_equal( "'()", @sh.send("'()"))
+    assert_equal( "'()", @sh.send("()"))
+
     assert_equal( "#f", @sh.send("#f"))
     assert_equal( "#t", @sh.send("#t"))
+
+    assert_equal( "'foo-symbol", @sh.send("'foo-symbol"))
 
     assert_equal( "(1 . 2)", @sh.send("(cons 1 2)"))
     assert_equal( "(1 . 2)", @sh.send("'(1 . 2)"))
@@ -22,7 +27,14 @@ class ScriptFuShellTest < Test::Unit::TestCase
     assert_equal( "(1 2 3)", @sh.send("(list 1 2 3)"))
     assert_equal( "(1 2 3)", @sh.send("'(1 2 3)"))
 
+    assert_equal( "#(1 2)", @sh.send("#(1 2)"))
+
+    assert_equal( '#\a', @sh.send('#\a'))
+
     assert_equal( '"123"', @sh.send('"123"'))
+
+    assert_equal( '#<CLOSURE>', @sh.send('print'))
+    assert_equal( '#<PROCEDURE>', @sh.send('cons'))
 
     # escape char
     assert_equal( '"a"b"', @sh.send('"a\"b"'))
@@ -32,8 +44,6 @@ class ScriptFuShellTest < Test::Unit::TestCase
     assert_equal( '"a)b"', @sh.send('"a)b"'))
     
     assert_equal( "(1)", @sh.send("'(1)"))
-    assert_equal( "()", @sh.send("'()"))
-    assert_equal( "()", @sh.send("()"))
 
     assert_equal( "3", @sh.send("(+ 1 \n 2)"))
     assert_equal( "3", @sh.send("(+ 1 \n ;; comment \n 2)"))

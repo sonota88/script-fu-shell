@@ -16,9 +16,8 @@ class ScriptFuShellTest < Test::Unit::TestCase
     assert_equal( "#f", @sh.send("#f"))
     assert_equal( "#t", @sh.send("#t"))
 
-    # unexpected behaviour!
-    # assert_equal( "(1 . 2)", @sh.send("(cons 1 2)"))
-    # assert_equal( "(1 . 2)", @sh.send("'(1 . 2)"))
+    assert_equal( "(1 . 2)", @sh.send("(cons 1 2)"))
+    assert_equal( "(1 . 2)", @sh.send("'(1 . 2)"))
 
     assert_equal( "(1 2 3)", @sh.send("(list 1 2 3)"))
     assert_equal( "(1 2 3)", @sh.send("'(1 2 3)"))

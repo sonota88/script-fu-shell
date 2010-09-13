@@ -69,7 +69,7 @@ class ScriptFuShell
   def send(script)
     return "<no input>" if /\A\s*\Z/m =~ script
     puts script.strip
-    send_raw %Q{(return-item-tostring #{script.strip})}
+    send_raw %Q{(item->string #{script.strip})}
   end
 
 
@@ -99,28 +99,30 @@ class ScriptFuShell
 
   def script_fu_init
     send_raw(
-      <<-EOB
-      (define (return-item-tostring item)
-        (cond
-          ((eq? #f item) "#f")
-          ((eq? #t item) "#t")
-          ((string? item) (string-append "\\"" item "\\""))
-          ((number? item) (number->string item))
-          ((procedure? item) "<procedure>")
-          ((vector? item) "<vector>")
-          ((null? item) "()")
-          ((symbol? item) (string-append
-            "<symbol> "
-            (symbol->string item)))
-          ((pair? item) (string-append 
-              "("
-              (unbreakupstr
-                (map return-item-tostring item)
-                " ")
-              ")"
-              ))
-          (else item)))
-      EOB
+      <<EOB
+(define (item->string item)
+  (cond ((eq? #f item) "#f")
+        ((eq? #t item) "#t")
+        ((string? item) (string-append "\\"" item "\\""))
+        ((number? item) (number->string item))
+        ((procedure? item) "<procedure>")
+        ((vector? item) "<vector>")
+        ((null? item) "()")
+        ((symbol? item) (string-append
+                         "<symbol> "
+                         (symbol->string item)))
+        ((list? item) (string-append
+                       "("
+                       (unbreakupstr (map item->string item) " ")
+                       ")"))
+        ((pair? item) (string-append
+                       "("
+                       (item->string (car item))
+                       " . "
+                       (item->string (cdr item))
+                       ")"))
+        (else item)))
+EOB
     )
   end
   

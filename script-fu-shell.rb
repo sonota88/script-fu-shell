@@ -52,7 +52,6 @@ class ScriptFuShell
     #
 
     IO::select( [@soc], nil, nil, nil)
-    sleep 0.1
 
     magic       = @soc.read(1)
     @error_code = @soc.read(1)

@@ -68,7 +68,7 @@ class ScriptFuShell
 
   def send(script)
     return "<no input>" if /\A\s*\Z/m =~ script
-    puts script.strip
+    #puts script.strip
     send_raw %Q{(item->string #{script.strip})}
   end
 
@@ -151,9 +151,19 @@ EOB
       end
     end
   end
+
+  
+  def one(exp)
+    script_fu_init
+    send(exp)
+  end
 end
 
 
 if $0 == __FILE__
-  ScriptFuShell.new.run
+  if ARGV[0] == "db"
+    puts ScriptFuShell.new.one( '(cadr (gimp-procedural-db-query "" "" "" "" "" "" ""))' )
+  else
+    ScriptFuShell.new.run
+  end
 end

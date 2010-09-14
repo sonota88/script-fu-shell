@@ -22,6 +22,13 @@ require "readline"
 require "optparse"
 
 
+class String
+  def strip_quote
+    self.sub(/\A"(.+)"\Z/m, '\1')
+  end
+end
+
+
 def file_at_app_dir(filename)
   File.join(File.dirname(__FILE__), filename)
 end
@@ -30,7 +37,11 @@ end
 class ScriptFuShell
   attr_accessor :debug, :error_code
 
-  def initialize(options)
+  def initialize(options={})
+    options[:verbose] ||= false
+    options[:server]  ||= "127.0.0.1"
+    options[:port]    ||= 10008
+
     @soc = TCPSocket.open(options[:server], options[:port])
     @paren_depth = 0
     @out_of_string = true
@@ -43,6 +54,9 @@ class ScriptFuShell
     @error_code = nil
 
     @verbose = options[:verbose]
+
+    script_fu_init
+    completion_init
   end
 
 
@@ -108,11 +122,25 @@ class ScriptFuShell
   def script_fu_init
     send_raw( File.read( file_at_app_dir("script-fu-shell-init.scm") ) )
   end
+
+
+  def completion_init
+    cache_path = file_at_app_dir("script-fu-functions-cache.txt")
+    if File.exist? cache_path
+      $words = File.read(cache_path).strip.split("\n")
+    else
+      functions_str = send( '(sfs:list-all-functions:lines)' )
+      $words = functions_str.strip.strip_quote.split("\n")
+      open(cache_path, "w"){|f| f.puts $words }
+    end
+    
+    Readline.completion_proc = proc {|word|
+      $words.grep(/\A#{Regexp.quote word}/)
+    }
+  end
   
 
   def run
-    script_fu_init()
-    
     while line = Readline.readline( @prompt, true)
       if sexp_closed?(line)
         result = send(@sexp + line)
@@ -132,7 +160,6 @@ class ScriptFuShell
 
   
   def one(exp)
-    script_fu_init
     send(exp)
   end
 
@@ -147,11 +174,7 @@ end
 
 
 if $0 == __FILE__
-  options = {
-    :verbose => false,
-    :server => "127.0.0.1",
-    :port => 10008
-  }
+  options = {}
 
   OptionParser.new {|opt|
     opt.on("-s", "--server=ADDRESS") {|v| options[:port] = v }

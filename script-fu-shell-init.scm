@@ -32,3 +32,7 @@
 
 (define (sfs:list-all-functions)
    (cadr (gimp-procedural-db-query "" "" "" "" "" "" "")))
+(define (sfs:list-all-functions:lines)
+  (unbreakupstr
+   (sfs:list-all-functions)
+   "\n"))

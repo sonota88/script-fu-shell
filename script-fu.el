@@ -6,7 +6,8 @@
 ;; (require 'script-fu)
 ;;
 ;; (setq script-fu-program-name
-;;       "~/foo/bar/gimp/script-fu/script-fu-shell.rb")
+;;       "~/foo/bar/gimp/script-fu/script-fu-shell")
+;; ;; NG: "ruby ~/foo/script-fu-shell -v"
 ;; ;;specify script-fu-shell.bat when windows.
 ;;
 ;; ;; not necessary

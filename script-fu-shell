@@ -1,0 +1,7 @@
+#!/bin/bash
+# -*- mode: sh -*-
+
+RUBY=`which ruby`
+APP_HOME=`dirname $0`
+
+$RUBY $APP_HOME/script-fu-shell.rb $*

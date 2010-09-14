@@ -60,6 +60,27 @@ class ScriptFuShell
   end
 
 
+  def script_fu_init
+    send_raw( File.read( file_at_app_dir("script-fu-shell-init.scm") ) )
+  end
+
+
+  def completion_init
+    cache_path = file_at_app_dir("script-fu-functions-cache.txt")
+    if File.exist? cache_path
+      $words = File.read(cache_path).strip.split("\n")
+    else
+      functions_str = send( '(sfs:list-all-functions:lines)' )
+      $words = functions_str.strip.strip_quote.split("\n")
+      open(cache_path, "w"){|f| f.puts $words }
+    end
+    
+    Readline.completion_proc = proc {|word|
+      $words.grep(/\A#{Regexp.quote word}/)
+    }
+  end
+
+  
   def byte2i(x)
     x.unpack("C").first.to_i
   end
@@ -70,8 +91,6 @@ class ScriptFuShell
     pp [ ["G", script.length].pack("an") ] if @debug
     @soc.write header
     @soc.write script
-
-    #
 
     IO::select( [@soc], nil, nil, nil)
 
@@ -117,29 +136,13 @@ class ScriptFuShell
 
     return ((@paren_depth == 0) ? true : false) && @out_of_string
   end
-
-
-  def script_fu_init
-    send_raw( File.read( file_at_app_dir("script-fu-shell-init.scm") ) )
-  end
-
-
-  def completion_init
-    cache_path = file_at_app_dir("script-fu-functions-cache.txt")
-    if File.exist? cache_path
-      $words = File.read(cache_path).strip.split("\n")
-    else
-      functions_str = send( '(sfs:list-all-functions:lines)' )
-      $words = functions_str.strip.strip_quote.split("\n")
-      open(cache_path, "w"){|f| f.puts $words }
-    end
-    
-    Readline.completion_proc = proc {|word|
-      $words.grep(/\A#{Regexp.quote word}/)
-    }
+  
+  
+  def one(exp)
+    send(exp)
   end
   
-
+  
   def run
     while line = Readline.readline( @prompt, true)
       if sexp_closed?(line)
@@ -159,15 +162,12 @@ class ScriptFuShell
   end
 
   
-  def one(exp)
-    send(exp)
-  end
-
-
   def action(options, argv)
     case options[:action]
     when :functions_sexp
       puts one('(sfs:list-all-functions)')
+    else
+      raise "unknown action"
     end
   end
 end
@@ -181,13 +181,13 @@ if $0 == __FILE__
     opt.on("-p", "--port=PORT")      {|v| options[:port] = v.to_i }
     opt.on("-v", "--verbose")        {|v| options[:verbose] = true }
 
-    opt.on("--functions-sexp")       {|v| options[:action] = :functions_sexp }
+    opt.on("--functions-sexp")    {|v| options[:action] = :functions_sexp }
 
     opt.parse!(ARGV)
   }
 
   sh = ScriptFuShell.new(options)
-
+  
   if options[:action]
     sh.action(options, ARGV)
   else

@@ -49,7 +49,7 @@
             (with-temp-buffer
               "*gimp-db*"
               (call-process scheme-program-name nil t nil
-                            "db")
+                            "--functions-sexp")
                (buffer-string))))
     (mapcar
      (lambda (func-name)

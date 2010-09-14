@@ -135,6 +135,14 @@ class ScriptFuShell
     script_fu_init
     send(exp)
   end
+
+
+  def action(options, argv)
+    case options[:action]
+    when :functions_sexp
+      puts one('(sfs:list-all-functions)')
+    end
+  end
 end
 
 
@@ -149,13 +157,16 @@ if $0 == __FILE__
     opt.on("-s", "--server=ADDRESS") {|v| options[:port] = v }
     opt.on("-p", "--port=PORT")      {|v| options[:port] = v.to_i }
     opt.on("-v", "--verbose")        {|v| options[:verbose] = true }
+
+    opt.on("--functions-sexp")       {|v| options[:action] = :functions_sexp }
+
     opt.parse!(ARGV)
   }
 
   sh = ScriptFuShell.new(options)
 
-  if ARGV[0] == "db"
-    puts sh.one( '(cadr (gimp-procedural-db-query "" "" "" "" "" "" ""))' )
+  if options[:action]
+    sh.action(options, ARGV)
   else
     sh.run
   end

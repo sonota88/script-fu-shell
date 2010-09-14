@@ -25,3 +25,10 @@
         ((closure? item) "#<CLOSURE>")
         ((procedure? item) "#<PROCEDURE>")
         (else "<?>")))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(define (sfs:list-all-functions)
+   (cadr (gimp-procedural-db-query "" "" "" "" "" "" "")))

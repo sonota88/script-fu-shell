@@ -26,6 +26,26 @@ class String
   def strip_quote
     self.sub(/\A"(.+)"\Z/m, '\1')
   end
+
+
+  def indent_and_truncate(n)
+    width = 80
+    result = ""
+    lines = []
+    str = self
+    
+    loop {
+      break if str.nil?
+      head = str[0..(width-n)]
+      tail = str[(width-n+1)..-1]
+      lines << head
+      str = tail
+    }
+    
+    lines.map{|line|
+      " " * n + line
+    }.join("\n")
+  end
 end
 
 
@@ -162,12 +182,30 @@ class ScriptFuShell
   end
 
   
+  def format_args_values_desc(func_name, arg_or_value)
+    names = one( %Q!(function-#{arg_or_value}-name "#{func_name}")! ).strip_quote.split("\n")
+    types = one( %Q!(function-#{arg_or_value}-type "#{func_name}")! ).strip_quote.split("\n").map{|x| x.sub(/^PDB-/, "")}
+    descs = one( %Q!(function-#{arg_or_value}-desc "#{func_name}")! ).strip_quote.split("\n")
+
+    names.zip(types, descs).map{|x|
+      "  %s (%s)\n%s" % [x[0], x[1], x[2].indent_and_truncate(4) ]
+    }.join("\n")
+  end
+  
+
   def action(options, argv)
     case options[:action]
     when :eval
       puts one(argv.join(" "))
     when :functions_sexp
       puts one('(sfs:list-all-functions)')
+    when :function_desc_full
+      func = argv[0]
+      puts [ one(%Q!(function-blurb "#{func}")!).strip_quote,
+             "Arguments:\n" + format_args_values_desc(func, "args"),
+             "Return values:\n" + format_args_values_desc(func, "values"),
+             one(%Q!(function-help "#{func}")!).strip_quote,
+           ].join("\n\n")
     else
       raise "unknown action"
     end
@@ -185,6 +223,7 @@ if $0 == __FILE__
 
     opt.on("-e", "--eval")        {|v| options[:action] = :eval }
     opt.on("--functions-sexp")    {|v| options[:action] = :functions_sexp }
+    opt.on("--function-desc-full"){|v| options[:action] = :function_desc_full }
 
     opt.parse!(ARGV)
   }

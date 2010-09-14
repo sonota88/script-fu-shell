@@ -23,13 +23,23 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(define-derived-mode script-fu-mode scheme-mode
-  "script-fu"
-  "Major mode for Script-Fu."
+(defun script-fu:refresh-ac-dictionary ()
+    (interactive)
+    ;; 辞書に gimp-procedural-db-query の結果をセット
+    (setq func-names
+           (read
+            (with-temp-buffer
+              "*gimp-db*"
+              (call-process script-fu-program-name nil t nil
+                            "--functions-sexp")
+              (buffer-string))))
+    (mapcar
+     (lambda (func-name)
+       (add-to-list 'ac-user-dictionary func-name))
+     func-names))
 
-  (setq scheme-program-name script-fu-program-name)
-  
-  (defun script-fu-other-window ()
+
+(defun script-fu-other-window ()
     "Run scheme on other window"
     (interactive)
     (let ((win (selected-window)))
@@ -38,23 +48,15 @@
       (run-scheme scheme-program-name)
       (select-window win)))
 
+
+(define-derived-mode script-fu-mode scheme-mode
+  "script-fu"
+  "Major mode for Script-Fu."
+
+  (setq scheme-program-name script-fu-program-name)
+  
   (define-key global-map
     "\C-c\C-s" 'script-fu-other-window)
-
-  (defun script-fu:refresh-ac-dictionary ()
-    (interactive)
-    ;; 辞書に gimp-procedural-db-query の結果をセット
-    (setq func-names
-           (read
-            (with-temp-buffer
-              "*gimp-db*"
-              (call-process scheme-program-name nil t nil
-                            "--functions-sexp")
-               (buffer-string))))
-    (mapcar
-     (lambda (func-name)
-       (add-to-list 'ac-user-dictionary func-name))
-     func-names))
 
   (if (featurep 'auto-complete)
       (script-fu:refresh-ac-dictionary))

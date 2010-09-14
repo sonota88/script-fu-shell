@@ -19,13 +19,14 @@ Derived from a Perl Module Gimp::ScriptFu::Client (Version 1.01, Feb 6, 2007) by
 require "pp"
 require "socket"
 require "readline"
+require "optparse"
 
 
 class ScriptFuShell
   attr_accessor :debug, :error_code
 
-  def initialize
-    @soc = TCPSocket.open("localhost", 10008)
+  def initialize(options)
+    @soc = TCPSocket.open(options[:server], options[:port])
     @paren_depth = 0
     @out_of_string = true
     @normal_prompt = "> "
@@ -35,6 +36,8 @@ class ScriptFuShell
 
     @debug = $DEBUG
     @error_code = nil
+
+    @verbose = options[:verbose]
   end
 
 
@@ -68,7 +71,7 @@ class ScriptFuShell
 
   def send(script)
     return "<no input>" if /\A\s*\Z/m =~ script
-    #puts script.strip
+    puts script.strip if @verbose
     send_raw %Q{(item->string #{script.strip})}
   end
 
@@ -161,9 +164,24 @@ end
 
 
 if $0 == __FILE__
+  options = {
+    :verbose => false,
+    :server => "127.0.0.1",
+    :port => 10008
+  }
+
+  OptionParser.new {|opt|
+    opt.on("-s", "--server=ADDRESS") {|v| options[:port] = v }
+    opt.on("-p", "--port=PORT")      {|v| options[:port] = v.to_i }
+    opt.on("-v", "--verbose")        {|v| options[:verbose] = true }
+    opt.parse!(ARGV)
+  }
+
+  sh = ScriptFuShell.new(options)
+
   if ARGV[0] == "db"
-    puts ScriptFuShell.new.one( '(cadr (gimp-procedural-db-query "" "" "" "" "" "" ""))' )
+    puts sh.one( '(cadr (gimp-procedural-db-query "" "" "" "" "" "" ""))' )
   else
-    ScriptFuShell.new.run
+    sh.run
   end
 end

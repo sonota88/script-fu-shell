@@ -199,6 +199,8 @@ class ScriptFuShell
       puts one(argv.join(" "))
     when :functions_sexp
       puts one('(sfs:list-all-functions)')
+    when :function_args_name
+      puts one( %Q!(function-args-name "#{argv[0]}")! ).strip_quote
     when :function_desc_full
       func = argv[0]
       puts [ one(%Q!(function-blurb "#{func}")!).strip_quote,
@@ -223,6 +225,7 @@ if $0 == __FILE__
 
     opt.on("-e", "--eval")        {|v| options[:action] = :eval }
     opt.on("--functions-sexp")    {|v| options[:action] = :functions_sexp }
+    opt.on("--function-args-name"){|v| options[:action] = :function_args_name }
     opt.on("--function-desc-full"){|v| options[:action] = :function_desc_full }
 
     opt.parse!(ARGV)

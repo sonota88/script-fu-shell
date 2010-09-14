@@ -164,6 +164,8 @@ class ScriptFuShell
   
   def action(options, argv)
     case options[:action]
+    when :eval
+      puts one(argv.join(" "))
     when :functions_sexp
       puts one('(sfs:list-all-functions)')
     else
@@ -181,6 +183,7 @@ if $0 == __FILE__
     opt.on("-p", "--port=PORT")      {|v| options[:port] = v.to_i }
     opt.on("-v", "--verbose")        {|v| options[:verbose] = true }
 
+    opt.on("-e", "--eval")        {|v| options[:action] = :eval }
     opt.on("--functions-sexp")    {|v| options[:action] = :functions_sexp }
 
     opt.parse!(ARGV)

@@ -61,6 +61,12 @@
   (if (featurep 'auto-complete)
       (script-fu:refresh-ac-dictionary))
   
+  (defadvice run-scheme
+    (after my-run-scheme activate)
+    (set-process-coding-system
+     (get-process "scheme") 'utf-8-unix 'utf-8-unix))
+  (ad-activate 'run-scheme)
+
   (run-hooks 'script-fu-mode-hook))
 
 (provide 'script-fu)

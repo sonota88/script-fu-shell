@@ -27,33 +27,34 @@
         (else "<?>")))
 
 (define arg-type-list
-  '("PDB-INT32"
-    "PDB-INT16"
-    "PDB-INT8"
-    "PDB-FLOAT"
-    "PDB-STRING"
-    "PDB-INT32ARRAY"
-    "PDB-INT16ARRAY"
-    "PDB-INT8ARRAY"
-    "PDB-FLOATARRAY"
-    "PDB-STRINGARRAY"
-    "PDB-COLOR"
-    "PDB-REGION"
-    "PDB-DISPLAY"
-    "PDB-IMAGE"
-    "PDB-LAYER"
-    "PDB-CHANNEL"
-    "PDB-DRAWABLE"
-    "PDB-SELECTION"
-    "PDB-COLORARRAY"
-    "PDB-VECTORS"
-    "PDB-PARASITE"
-    "PDB-STATUS"))
+  '("INT32"
+    "INT16"
+    "INT8"
+    "FLOAT"
+    "STRING"
+    "INT32ARRAY"
+    "INT16ARRAY"
+    "INT8ARRAY"
+    "FLOATARRAY"
+    "STRINGARRAY"
+    "COLOR"
+    "REGION"
+    "DISPLAY"
+    "IMAGE"
+    "LAYER"
+    "CHANNEL"
+    "DRAWABLE"
+    "SELECTION"
+    "COLORARRAY"
+    "VECTORS"
+    "PARASITE"
+    "STATUS"))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define (function-args-values:main proc func-name which target-index)
-  (define (seq n)
+
+
+(define (seq n)
     (letrec
         ((seq-sub
           (lambda (n)
@@ -63,17 +64,20 @@
                       (seq-sub (- n 1)))))))
       (reverse (seq-sub (- n 1)))))
 
+
+(define (function-args-values:main proc func-name which target-index)
   (define (arg-num func-name)
     (nth target-index (gimp-procedural-db-proc-info func-name)))
 
-  (unbreakupstr
-   (mapcar
-    (lambda (n)
-      (if (= which 0) ;; when type
-          (nth (nth which (proc func-name n)) arg-type-list)
-          (nth which (proc func-name n))))
-    (seq (arg-num func-name)))
-   "\n"))
+  (if (> (arg-num func-name) 0)
+      (mapcar
+       (lambda (n)
+         (if (= which 0) ;; when type
+             (nth (nth which (proc func-name n)) arg-type-list)
+             (nth which (proc func-name n))))
+       (seq (arg-num func-name)))
+      '()))
+
 
 (define (function-args-values type func-name which)
   (cond ((eq? type 'arg)
@@ -110,5 +114,5 @@
    (cadr (gimp-procedural-db-query "" "" "" "" "" "" "")))
 (define (sfs:list-all-functions:lines)
   (unbreakupstr
-   (sfs:list-all-functions)
+   (script-fu-shell:list-all-functions)
    "\n"))

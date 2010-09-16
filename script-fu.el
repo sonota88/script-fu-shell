@@ -18,9 +18,34 @@
 
 
 (defvar script-fu-program-name)
+(defvar script-fu:functions-list)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(defun script-fu:eldoc-signature (name)
+  (with-temp-buffer
+    "*gimp-db*"
+    (call-process script-fu-program-name nil t nil
+                  "--function-args" name)
+    (goto-char (point-max))
+    (backward-delete-char 1)
+    (goto-char (point-min))
+    (replace-string "\n" " ")
+    (buffer-string)))
+
+(defun script-fu:get-current-symbol-info ()
+  (interactive)
+  (let* ((name (format "%s" (sexp-at-point)))
+         (signature
+          (if (member name script-fu:functions-list)
+              (script-fu:eldoc-signature name)
+            nil)))
+    (when signature
+      (format "%s: (%s)"
+              name
+              signature))))
 
 
 (defun script-fu:refresh-ac-dictionary ()
@@ -33,6 +58,8 @@
               (call-process script-fu-program-name nil t nil
                             "--functions-sexp")
               (buffer-string))))
+    (setq script-fu:functions-list func-names)
+
     (mapcar
      (lambda (func-name)
        (add-to-list 'ac-user-dictionary func-name))
@@ -60,6 +87,11 @@
 
   (if (featurep 'auto-complete)
       (script-fu:refresh-ac-dictionary))
+  
+  (when t
+    (make-local-variable 'eldoc-documentation-function)
+    (setq eldoc-documentation-function 'script-fu:get-current-symbol-info)
+    (turn-on-eldoc-mode))
   
   (defadvice run-scheme
     (after my-run-scheme activate)

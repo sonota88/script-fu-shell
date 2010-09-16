@@ -19,9 +19,98 @@
 
 (defvar script-fu-program-name)
 (defvar script-fu:functions-list)
+(defvar script-fu:help-buffer-name "*Script-Fu Help*")
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun script-fu:help-highlight (buffer)
+  (with-current-buffer buffer
+
+    (save-excursion
+      (goto-char (point-min))
+      (while (search-forward "" nil t)
+        (replace-match "" nil nil)))
+    
+    (let ((end))
+      (font-lock-mode t)
+      (goto-char (point-min))
+      (while (search-forward-regexp "^----.+----$" nil t)
+        (setq end (point))
+        (beginning-of-line)
+        (add-text-properties
+         (point) end '(font-lock-face font-lock-builtin-face))
+        (forward-line))
+
+      (goto-char (point-min))
+      (while (search-forward-regexp
+              "^\\(-------- \\(Arguments\\|Return values\\) --------\\|--\\)$" nil t)
+        (forward-line) (end-of-line)
+        (setq end (point))
+        (beginning-of-line)
+        (add-text-properties
+         (point) end '(font-lock-face font-lock-variable-name-face))
+        (forward-line)))))
+
+
+(defun script-fu:show-help-filter (proc str)
+  (set-process-filter proc nil)
+
+  (let ((help-buf (get-buffer-create "*Script-Fu Help*")))
+    (with-current-buffer help-buf
+      (erase-buffer)
+      (insert str)
+
+      ;; format output-msg
+      (progn
+        ;; (delete-backward-char 4)
+        (insert "\n")
+
+        (goto-char (point-min))
+        (search-forward "=> \"")
+        (delete-region (point-min) (point)))
+
+      (goto-char (point-min))
+      (script-fu:help-highlight help-buf)
+      (goto-char (point-min)))))
+
+
+(defun script-fu:help-other-window (name)
+  (let ((orig-buf (current-buffer))
+        (orig-win (selected-window))
+        (help-buf (get-buffer-create script-fu:help-buffer-name))
+        (str-to-send (concat
+                      "(procedure-info \""
+                      name
+                      "\")\n"))
+        (process-name "scheme"))
+
+    (with-temp-buffer ;; inhibit switching buffer
+      (run-scheme script-fu-program-name))
+
+    (with-current-buffer help-buf
+      (erase-buffer)
+      (insert "please wait..."))
+
+    (set-process-filter (get-process process-name)
+                        'script-fu:show-help-filter)
+    (process-send-string process-name str-to-send)
+
+    (if (equal help-buf (current-buffer))
+        (goto-char (point-min))
+      (pop-to-buffer help-buf))
+
+    (select-window orig-win)
+    (switch-to-buffer orig-buf)))
+
+
+(setq anything-c-source-script-fu
+      '((name . "Script-Fu functions")
+        (candidates . script-fu:functions-list)
+        (action . (("Show help" . script-fu:help-other-window)
+                   ("Insert" . insert)))))
+
+(defun anything-script-fu-functions ()
+  (interactive)
+  (anything 'anything-c-source-script-fu))
 
 
 (defun script-fu:eldoc-signature (name)

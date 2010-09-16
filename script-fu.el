@@ -50,6 +50,7 @@
 
 (defun script-fu:refresh-ac-dictionary ()
     (interactive)
+    (auto-complete-mode t)
     ;; 辞書に gimp-procedural-db-query の結果をセット
     (setq func-names
            (read
@@ -65,6 +66,12 @@
        (add-to-list 'ac-user-dictionary func-name))
      func-names))
 
+(defun script-fu:regist-builtin-functions ()
+  (dolist (func-name
+           '("unbreakupstr"
+             "string-append"))
+    (add-to-list 'ac-user-dictionary func-name)))
+
 
 (defun script-fu-other-window ()
     "Run scheme on other window"
@@ -77,7 +84,7 @@
 
 
 (define-derived-mode script-fu-mode scheme-mode
-  "script-fu"
+  "Script-Fu"
   "Major mode for Script-Fu."
 
   (setq scheme-program-name script-fu-program-name)
@@ -85,8 +92,9 @@
   (define-key script-fu-mode-map
     (kbd "C-c C-s") 'script-fu-other-window)
 
-  (if (featurep 'auto-complete)
-      (script-fu:refresh-ac-dictionary))
+  (when (featurep 'auto-complete)
+    (script-fu:refresh-ac-dictionary)
+    (script-fu:regist-builtin-functions))
   
   (when t
     (make-local-variable 'eldoc-documentation-function)
@@ -100,5 +108,6 @@
   (ad-activate 'run-scheme)
 
   (run-hooks 'script-fu-mode-hook))
+
 
 (provide 'script-fu)

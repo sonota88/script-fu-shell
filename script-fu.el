@@ -54,9 +54,9 @@
   "Major mode for Script-Fu."
 
   (setq scheme-program-name script-fu-program-name)
-  
-  (define-key global-map
-    "\C-c\C-s" 'script-fu-other-window)
+
+  (define-key script-fu-mode-map
+    (kbd "C-c C-s") 'script-fu-other-window)
 
   (if (featurep 'auto-complete)
       (script-fu:refresh-ac-dictionary))

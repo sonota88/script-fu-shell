@@ -155,11 +155,7 @@
                  (throw 'get-function-list process-result))
                (buffer-string))))
       (setq script-fu:functions-list func-names)
-
-      (mapcar
-       (lambda (func-name)
-         (add-to-list 'ac-user-dictionary func-name))
-       func-names))
+      (setq ac-user-dictionary (append func-names ac-user-dictionary)))
 
     (unless (= 0 process-result)
       (warn "Script-Fu mode: Fail in getting function list. Maybe server is not running."))))

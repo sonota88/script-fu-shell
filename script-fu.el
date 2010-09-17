@@ -138,22 +138,32 @@
 
 
 (defun script-fu:refresh-ac-dictionary ()
-    (interactive)
-    (auto-complete-mode t)
-    ;; 辞書に gimp-procedural-db-query の結果をセット
-    (setq func-names
-           (read
-            (with-temp-buffer
-              "*gimp-db*"
-              (call-process script-fu-program-name nil t nil
-                            "--functions-sexp")
-              (buffer-string))))
-    (setq script-fu:functions-list func-names)
+  (interactive)
+  (auto-complete-mode t)
+  
+  (let ((process-result)
+        func-names)
+    (catch 'get-function-list
+      (setq func-names
+            (read
+             (with-temp-buffer
+               "*gimp-db*"
+               (setq process-result
+                     (call-process script-fu-program-name nil t nil
+                                   "--functions-sexp"))
+               (unless (= 0 process-result)
+                 (throw 'get-function-list process-result))
+               (buffer-string))))
+      (setq script-fu:functions-list func-names)
 
-    (mapcar
-     (lambda (func-name)
-       (add-to-list 'ac-user-dictionary func-name))
-     func-names))
+      (mapcar
+       (lambda (func-name)
+         (add-to-list 'ac-user-dictionary func-name))
+       func-names))
+
+    (unless (= 0 process-result)
+      (warn "Script-Fu mode: Fail in getting function list. Maybe server is not running."))))
+
 
 (defun script-fu:regist-builtin-functions ()
   (dolist (func-name

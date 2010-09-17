@@ -65,8 +65,8 @@
         (insert "\n")
 
         (goto-char (point-min))
-        (search-forward "=> \"")
-        (delete-region (point-min) (point)))
+        (if (search-forward "=> \"" nil t)
+            (replace-match "")))
 
       (goto-char (point-min))
       (script-fu:help-highlight help-buf)

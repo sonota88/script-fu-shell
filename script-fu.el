@@ -5,6 +5,7 @@
 ;; ;; (add-to-list 'load-path "~/foo/script-fu-shell") ; if needed
 ;; (require 'script-fu)
 ;; (setq script-fu:use-eldoc t)
+;; (setq script-fu:use-anything t)
 ;;
 ;; (setq script-fu-program-name
 ;;       "~/foo/bar/gimp/script-fu/script-fu-shell")
@@ -23,6 +24,7 @@
 (defvar script-fu:help-buffer-name "*Script-Fu Help*")
 
 (defvar script-fu:use-eldoc nil)
+(defvar script-fu:use-anything nil)
 
 
 (defun script-fu:help-highlight (buffer)
@@ -105,15 +107,16 @@
     (switch-to-buffer orig-buf)))
 
 
-(setq anything-c-source-script-fu
-      '((name . "Script-Fu functions")
-        (candidates . script-fu:functions-list)
-        (action . (("Show help" . script-fu:help-other-window)
-                   ("Insert" . insert)))))
+(defun script-fu:init-for-anything ()
+  (setq anything-c-source-script-fu
+        '((name . "Script-Fu functions")
+          (candidates . script-fu:functions-list)
+          (action . (("Show help" . script-fu:help-other-window)
+                     ("Insert" . insert)))))
 
-(defun anything-script-fu-functions ()
-  (interactive)
-  (anything 'anything-c-source-script-fu))
+  (defun anything-script-fu-functions ()
+    (interactive)
+    (anything 'anything-c-source-script-fu)))
 
 
 (defun script-fu:eldoc-signature (name)
@@ -218,6 +221,10 @@
     (turn-on-eldoc-mode)
     (make-local-variable 'eldoc-documentation-function)
     (setq eldoc-documentation-function 'script-fu:get-current-symbol-info))
+
+  (when (and script-fu:use-anything
+             (featurep 'anything))
+    (script-fu:init-for-anything))
   
   (defadvice run-scheme
     (after my-run-scheme activate)

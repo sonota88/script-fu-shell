@@ -4,6 +4,7 @@
 
 ;; ;; (add-to-list 'load-path "~/foo/script-fu-shell") ; if needed
 ;; (require 'script-fu)
+;; (setq script-fu:use-eldoc t)
 ;;
 ;; (setq script-fu-program-name
 ;;       "~/foo/bar/gimp/script-fu/script-fu-shell")
@@ -20,6 +21,8 @@
 (defvar script-fu-program-name)
 (defvar script-fu:functions-list)
 (defvar script-fu:help-buffer-name "*Script-Fu Help*")
+
+(defvar script-fu:use-eldoc nil)
 
 
 (defun script-fu:help-highlight (buffer)
@@ -211,10 +214,10 @@
     (script-fu:refresh-ac-dictionary)
     (script-fu:regist-builtin-functions))
   
-  (when t
+  (when script-fu:use-eldoc
+    (turn-on-eldoc-mode)
     (make-local-variable 'eldoc-documentation-function)
-    (setq eldoc-documentation-function 'script-fu:get-current-symbol-info)
-    (turn-on-eldoc-mode))
+    (setq eldoc-documentation-function 'script-fu:get-current-symbol-info))
   
   (defadvice run-scheme
     (after my-run-scheme activate)

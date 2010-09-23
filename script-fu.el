@@ -161,10 +161,29 @@
       (warn "Script-Fu mode: Fail in getting function list. Maybe server is not running."))))
 
 
+(defun script-fu:expand-with-appdir (filename)
+  (concat (replace-regexp-in-string "/[^/]+?$" ""
+                                    scheme-program-name)
+          "/"
+          filename))
+
+
+(defun script-fu:read-builtins ()
+  (with-temp-buffer
+    (insert-file-contents-literally
+     (script-fu:expand-with-appdir "builtins.txt"))
+
+    (beginning-of-buffer)
+    (replace-regexp "^ +" "")
+    (beginning-of-buffer)
+    (replace-regexp " +$" "")
+
+    (remove-if (lambda (line) (= (length line) 0))
+               (split-string (buffer-string) "\n"))))
+
+
 (defun script-fu:regist-builtin-functions ()
-  (dolist (func-name
-           '("unbreakupstr"
-             "string-append"))
+  (dolist (func-name (script-fu:read-builtins))
     (add-to-list 'ac-user-dictionary func-name)))
 
 

@@ -95,6 +95,9 @@ class ScriptFuShell
       open(cache_path, "w"){|f| f.puts $words }
     end
     
+    $words += File.readlines(file_at_app_dir("builtins.txt")
+                              ).map{|line| line.strip }
+
     Readline.completion_proc = proc {|word|
       $words.grep(/\A#{Regexp.quote word}/)
     }

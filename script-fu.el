@@ -6,6 +6,7 @@
 ;; (require 'script-fu)
 ;; (setq script-fu:use-eldoc t)
 ;; (setq script-fu:use-anything t)
+;; (setq script-fu:use-auto-complete t)
 ;;
 ;; (setq script-fu-program-name
 ;;       "~/foo/bar/gimp/script-fu/script-fu-shell")
@@ -25,6 +26,7 @@
 
 (defvar script-fu:use-eldoc nil)
 (defvar script-fu:use-anything nil)
+(defvar script-fu:use-auto-complete nil)
 
 
 (defun script-fu:help-highlight (buffer)
@@ -213,7 +215,8 @@
   (define-key script-fu-mode-map
     (kbd "C-c C-s") 'script-fu-other-window)
 
-  (when (featurep 'auto-complete)
+  (when (and script-fu:use-auto-complete
+             (featurep 'auto-complete))
     (script-fu:refresh-ac-dictionary)
     (script-fu:regist-builtin-functions))
   

@@ -137,14 +137,10 @@
               signature))))
 
 
-(defun script-fu:refresh-ac-dictionary ()
-  (interactive)
-  (auto-complete-mode t)
-  
-  (let ((process-result)
-        func-names)
+(defun script-fu:update-function-list ()
+  (let ((process-result))
     (catch 'get-function-list
-      (setq func-names
+      (setq script-fu:functions-list
             (read
              (with-temp-buffer
                "*gimp-db*"
@@ -154,11 +150,15 @@
                (unless (= 0 process-result)
                  (throw 'get-function-list process-result))
                (buffer-string))))
-      (setq script-fu:functions-list func-names)
-      (setq ac-user-dictionary (append func-names ac-user-dictionary)))
+      (unless (= 0 process-result)
+        (warn "Script-Fu mode: Fail in getting function list. Maybe server is not running.")))))
 
-    (unless (= 0 process-result)
-      (warn "Script-Fu mode: Fail in getting function list. Maybe server is not running."))))
+
+(defun script-fu:refresh-ac-dictionary ()
+  (interactive)
+  (auto-complete-mode t)
+  (setq ac-user-dictionary
+        (append script-fu:functions-list ac-user-dictionary)))
 
 
 (defun script-fu:expand-with-appdir (filename)
@@ -202,6 +202,7 @@
   "Major mode for Script-Fu."
 
   (setq scheme-program-name script-fu-program-name)
+  (script-fu:update-function-list)
 
   (define-key script-fu-mode-map
     (kbd "C-c C-s") 'script-fu-other-window)

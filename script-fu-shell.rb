@@ -168,7 +168,7 @@ class ScriptFuShell
 
   def dup_or_blank?(line)
     if Readline::HISTORY.size >= 2 &&
-        Readline::HISTORY[-2].to_s == line
+        Readline::HISTORY[-2] == line
       true
     elsif /^\s*$/ =~ line
       true

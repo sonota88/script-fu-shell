@@ -164,10 +164,24 @@ class ScriptFuShell
   def one(exp)
     send(exp)
   end
+
+
+  def dup_or_blank?(line)
+    if Readline::HISTORY.size >= 2 &&
+        Readline::HISTORY[-2].to_s == line
+      true
+    elsif /^\s*$/ =~ line
+      true
+    else
+      false
+    end
+  end
   
   
   def run
     while line = Readline.readline( @prompt, true)
+      Readline::HISTORY.pop if dup_or_blank?(line)
+
       if sexp_closed?(line)
         result = send(@sexp + line)
         print "=> ", result, "\n"

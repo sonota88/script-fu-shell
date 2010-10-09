@@ -11,7 +11,7 @@ class ScriptFuShellTest < Test::Unit::TestCase
   end
 
   def test_send
-    assert_equal( "<no input>", @sh.send(""))
+    assert_equal( "", @sh.send(""))
 
     assert_equal( "'()", @sh.send("'()"))
     assert_equal( "'()", @sh.send("()"))

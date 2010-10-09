@@ -131,7 +131,7 @@ class ScriptFuShell
   
 
   def send(script)
-    return "<no input>" if /\A\s*\Z/m =~ script
+    return "" if /\A\s*\Z/m =~ script
     puts script.strip if @verbose
     send_raw %Q{(item->string #{script.strip})}
   end

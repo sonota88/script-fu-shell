@@ -137,7 +137,7 @@ class ScriptFuShell
   end
 
 
-  def sexp_closed?(line)
+  def prepare_line(line)
     arr = line.split(//)
     pos = 0
     
@@ -151,13 +151,20 @@ class ScriptFuShell
         @paren_depth += 1 if @out_of_string
       when ")"
         @paren_depth -= 1 if @out_of_string
+      when ";"
+        return line[0...pos] if @out_of_string
       end
 
       pos += 1
       break if pos >= line.size
     end
 
-    return ((@paren_depth == 0) ? true : false) && @out_of_string
+    line
+  end
+
+
+  def toplevel_sexp_closed?
+    (@paren_depth == 0) && @out_of_string
   end
   
   
@@ -179,10 +186,11 @@ class ScriptFuShell
   
   
   def run
-    while line = Readline.readline( @prompt, true)
+    while raw_line = Readline.readline( @prompt, true)
       Readline::HISTORY.pop if dup_or_blank?(line)
 
-      if sexp_closed?(line)
+      line = prepare_line(raw_line)
+      if toplevel_sexp_closed?
         result = send(@sexp + line)
         print "=> ", result, "\n"
         

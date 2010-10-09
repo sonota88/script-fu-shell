@@ -59,4 +59,14 @@ class ScriptFuShellTest < Test::Unit::TestCase
     assert_equal('"' + "a"*1 + '"', @sh.send('(make-string 1 #\a)'))
     assert_equal('"' + "a"*254 + '"', @sh.send('(make-string 254 #\a)'))
   end
+
+
+  def test_parse_line
+    assert_equal(""        , @sh.prepare_line(""))
+    assert_equal("a"       , @sh.prepare_line("a"))
+    assert_equal("a"       , @sh.prepare_line("a;b"))
+    assert_equal("a"       , @sh.prepare_line("a;("))
+    assert_equal("a"       , @sh.prepare_line( %Q<a;"> ))
+    assert_equal('a ";" b' , @sh.prepare_line('a ";" b'))
+  end
 end

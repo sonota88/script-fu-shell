@@ -1,3 +1,5 @@
+;; -*- script-fu -*-
+
 (define (item->string item)
   (cond ((null? item) "'()")
         ((eq? #f item) "#f")

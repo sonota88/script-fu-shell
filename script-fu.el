@@ -130,18 +130,26 @@
     (backward-delete-char 1)
     (goto-char (point-min))
     (replace-string "\n" " ")
+    (replace-string "\"" "")
+    (upcase-region (point-min) (point-max))
     (buffer-string)))
+
+(defun script-fu:current-function-name ()
+  (interactive)
+  (save-excursion
+    (eldoc-beginning-of-sexp)
+    (thing-at-point 'symbol)))
 
 (defun script-fu:get-current-symbol-info ()
   (interactive)
-  (let* ((name (format "%s" (sexp-at-point)))
+  (let* ((name (script-fu:current-function-name))
          (signature
           (if (member name script-fu:functions-list)
               (script-fu:eldoc-signature name)
             nil)))
     (when signature
-      (format "%s: (%s)"
-              name
+      (format "%s: %s"
+              (propertize name 'face 'font-lock-function-name-face)
               signature))))
 
 
